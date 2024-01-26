@@ -27,24 +27,22 @@ const {
 const router = express.Router();
 //-----------ROUTES------------//
 router.get("/", getAccommodations);
-router.get("/:id", getSingleAccommodation);
-router.get("/:id/pictures", getPictures);
 router.get("/:id/dates", getDates);
 
 //For dev only
-router.post("/", authenticateUser, createAccommodation);
+router.post("/", createAccommodation);
 
 // router.delete("/:id/dates/:id", deleteDate);
 
 //JWT
-router.post("/:id/pictures", upload.array("images", 10), addPictures);
+router.post("/:id/pictures", upload.array("images", 20), addPictures);
 router.patch(
-  "/:id/dates/availablility",
-  authenticateUser,
+  "/:id/dates/availability",
+
   updateAvailabilityForDates
 );
-router.patch("/:id/dates/rates", authenticateUser, updateRatesForDates);
-router.patch("/:id/defaultRate", authenticateUser, updateDefaultRate);
+router.patch("/:id/dates/rates", updateRatesForDates);
+router.patch("/:id/defaultRate", updateDefaultRate);
 router.delete(
   "/:accommodationId/pictures/:pictureId",
   authenticateUser,

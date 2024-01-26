@@ -9,10 +9,8 @@ const sharp = require('sharp') */
 const {
   S3Client,
   PutObjectCommand,
-  GetObjectCommand,
   DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
 const s3 = new S3Client({
   credentials: {
@@ -25,27 +23,6 @@ const s3 = new S3Client({
 const randomImageName = (bytes = 32) =>
   crypto.randomBytes(bytes).toString("hex");
 
-const getPictures = async (req, res) => {
-  const { id: accommodationID } = req.params;
-  const accommodation = await Accommodation.findOne({ _id: accommodationID });
-  if (!accommodation) {
-    throw new NotFoundError(`No accommodation with the id ${accommodationID}`);
-  }
-  const pictures = accommodation.pictures;
-  if (pictures.length === 0) {
-    throw new NotFoundError("no pictures found");
-  }
-  for (const picture of pictures) {
-    const getObjectParams = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: picture.imageName,
-    };
-    const command = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    picture.url = url;
-  }
-  res.send(pictures);
-};
 const addPictures = async (req, res) => {
   const images = [];
   for (const file of req.files) {
@@ -94,4 +71,4 @@ const deletePicture = async (req, res) => {
   res.send({});
 };
 
-module.exports = { getPictures, addPictures, deletePicture };
+module.exports = { addPictures, deletePicture };

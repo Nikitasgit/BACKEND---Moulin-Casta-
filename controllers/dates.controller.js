@@ -1,5 +1,5 @@
 const { StatusCodes } = require("http-status-codes");
-const { NotFoundError, BadRequestError } = require("../errors");
+const { NotFoundError, BadRequestError } = require("../errors/index");
 const Accommodation = require("../models/acccommodation.model");
 
 const getDates = async (req, res) => {
@@ -14,13 +14,20 @@ const getDates = async (req, res) => {
 const updateAvailabilityForDates = async (req, res) => {
   const { id: accommodationID } = req.params;
   const { dates, availability } = req.body;
-  if (!dates === "" || !availability === "") {
-    throw new BadRequestError("Please provide dates and their availability");
+  console.log("Request Body:", req.body);
+
+  if (!dates || typeof availability === "undefined") {
+    throw new BadRequestError(
+      "Please provide both dates and availability in the request body."
+    );
   }
+  console.log("Availability:", availability);
   const accommodation = await Accommodation.findOne({ _id: accommodationID });
+
   if (!accommodation) {
     throw new NotFoundError(`No accommodation with the id ${accommodationID}`);
   }
+
   accommodation.dates.forEach((dateObj) => {
     // Check if the date is present in the frontend dates array
     const frontendDateString = dates.find(
@@ -30,10 +37,10 @@ const updateAvailabilityForDates = async (req, res) => {
       dateObj.available = availability;
     }
   });
+
   await accommodation.save();
   res.status(StatusCodes.OK).json({ accommodation });
 };
-
 module.exports = {
   getDates,
   updateAvailabilityForDates,
