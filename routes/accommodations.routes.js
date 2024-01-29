@@ -30,19 +30,24 @@ router.get("/", getAccommodations);
 router.get("/:id/dates", getDates);
 
 //For dev only
-router.post("/", createAccommodation);
+router.post("/", authenticateUser, createAccommodation);
 
 // router.delete("/:id/dates/:id", deleteDate);
 
 //JWT
-router.post("/:id/pictures", upload.array("images", 20), addPictures);
+router.post(
+  "/:id/pictures",
+  upload.array("images", 20),
+  authenticateUser,
+  addPictures
+);
 router.patch(
   "/:id/dates/availability",
-
+  authenticateUser,
   updateAvailabilityForDates
 );
-router.patch("/:id/dates/rates", updateRatesForDates);
-router.patch("/:id/defaultRate", updateDefaultRate);
+router.patch("/:id/dates/rates", authenticateUser, updateRatesForDates);
+router.patch("/:id/defaultRate", authenticateUser, updateDefaultRate);
 router.delete(
   "/:accommodationId/pictures/:pictureId",
   authenticateUser,

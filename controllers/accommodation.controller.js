@@ -43,28 +43,57 @@ const getAccommodations = async (req, res) => {
       .json({ error: "Internal Server Error" });
   }
 };
-
 const createAccommodation = async (req, res) => {
-  const { name, defaultRate, description, hours, location, capacity } =
-    req.body;
+  const requiredFields = [
+    "name",
+    "defaultRate",
+    "description",
+    "hours",
+    "capacity",
+    "location",
+    "gps",
+  ];
+  const amenities = [
+    "bedrooms",
+    "surface",
+    "singleBed",
+    "doubleBed",
+    "bathRoom",
+    "toilet",
+    "garden",
+    "swimmingPool",
+    "river",
+    "parking",
+    "freeParking",
+    "barbecue",
+    "towels",
+    "moutainView",
+    "seaView",
+    "gardenLounge",
+    "laundry",
+    "dishwasher",
+    "oven",
+    "microwave",
+    "coffee",
+    "hairdryer",
+    "fireplace",
+    "wifi",
+    "ac",
+    "babyBed",
+    "petFriendly",
+    "jacuzzi",
+  ];
   if (
-    !name ||
-    !defaultRate ||
-    !description ||
-    !hours ||
-    !capacity ||
-    !location ||
-    location == "" ||
-    name === "" ||
-    defaultRate === "" ||
-    hours === "" ||
-    description === "" ||
-    capacity == ""
+    !requiredFields.every(
+      (field) => req.body[field] !== undefined && req.body[field] !== ""
+    ) ||
+    !amenities.every((amenity) => req.body.amenities[amenity] !== undefined)
   ) {
     throw new BadRequestError(
-      "Please provide a name, a default rate, hours, description, capacity and location"
+      "Please provide all required fields including amenities"
     );
   }
+
   req.body.dates = createDates(req.body.defaultRate);
   const accommodation = await Accommodation.create(req.body);
   res.status(StatusCodes.CREATED).json({ accommodation });

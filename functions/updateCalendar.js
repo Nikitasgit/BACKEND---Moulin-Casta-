@@ -6,11 +6,10 @@ const deletePastDates = async (accommodationID) => {
     throw new NotFoundError(`No accommodation with the id ${accommodationID}`);
   }
 
-  const currentDate = new Date();
   // Filter out dates in the past
-  const datesToDelete = accommodation.dates.filter(
-    (dateObj) => dateObj.date < currentDate
-  );
+  const datesToDelete = accommodation.dates.filter((dateObj) => {
+    dateObj.date < currentDate;
+  });
 
   if (datesToDelete.length > 0) {
     // Dates are in the past, delete them
