@@ -38,12 +38,12 @@ router.post("/", authenticateUser, createAccommodation);
 router.post(
   "/:id/pictures",
   upload.array("images", 20),
-  authenticateUser,
+  /*   authenticateUser, */
   addPictures
 );
 router.patch(
   "/:id/dates/availability",
-  authenticateUser,
+  /*   authenticateUser, */
   updateAvailabilityForDates
 );
 router.patch("/:id/dates/rates", authenticateUser, updateRatesForDates);
