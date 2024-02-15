@@ -30,11 +30,28 @@ const getAccommodations = async (req, res) => {
               return { ...picture.toObject(), url };
             })
           );
-          return { ...accommodation.toObject(), pictures: picturesWithUrls };
+          accommodation = {
+            ...accommodation.toObject(),
+            pictures: picturesWithUrls,
+          };
         }
-        return accommodation.toObject();
+
+        if (accommodation.video.videoName !== "") {
+          const video = accommodation.video;
+          const getObjectParams = {
+            Bucket: process.env.BUCKET_NAME,
+            Key: video.videoName,
+          };
+          const command = new GetObjectCommand(getObjectParams);
+          const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+
+          accommodation.video.url = url;
+        }
+
+        return accommodation;
       })
     );
+
     res.status(StatusCodes.OK).json({ accommodations: accommodationsWithUrls });
   } catch (error) {
     console.error(error);
@@ -43,57 +60,8 @@ const getAccommodations = async (req, res) => {
       .json({ error: "Internal Server Error" });
   }
 };
-const createAccommodation = async (req, res) => {
-  const requiredFields = [
-    "name",
-    "defaultRate",
-    "description",
-    "hours",
-    "capacity",
-    "location",
-    "gps",
-  ];
-  const amenities = [
-    "bedrooms",
-    "surface",
-    "singleBed",
-    "doubleBed",
-    "bathRoom",
-    "toilet",
-    "garden",
-    "petanque",
-    "swimmingPool",
-    "river",
-    "parking",
-    "barbecue",
-    "towels",
-    "mountainView",
-    "seaView",
-    "gardenLounge",
-    "laundry",
-    "dishwasher",
-    "oven",
-    "microwave",
-    "coffee",
-    "hairdryer",
-    "fireplace",
-    "wifi",
-    "ac",
-    "babyBed",
-    "petFriendly",
-    "jacuzzi",
-  ];
-  if (
-    !requiredFields.every(
-      (field) => req.body[field] !== undefined && req.body[field] !== ""
-    ) ||
-    !amenities.every((amenity) => req.body.amenities[amenity] !== undefined)
-  ) {
-    throw new BadRequestError(
-      "Please provide all required fields including amenities"
-    );
-  }
 
+const createAccommodation = async (req, res) => {
   req.body.dates = createDates(req.body.defaultRate);
   const accommodation = await Accommodation.create(req.body);
   res.status(StatusCodes.CREATED).json({ accommodation });
@@ -101,6 +69,5 @@ const createAccommodation = async (req, res) => {
 
 module.exports = {
   getAccommodations,
-
   createAccommodation,
 };

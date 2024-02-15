@@ -6,13 +6,12 @@ const express = require("express");
 const authenticateUser = require("../middleware/authentication");
 const {
   getAccommodations,
-  getSingleAccommodation,
   createAccommodation,
 } = require("../controllers/accommodation.controller");
 const {
-  getPictures,
   addPictures,
   deletePicture,
+  addVideo,
 } = require("../controllers/pictures.controller");
 const {
   getDates,
@@ -20,7 +19,6 @@ const {
   // deleteDate,
 } = require("../controllers/dates.controller");
 const {
-  // getDefaultRate,
   updateRatesForDates,
   updateDefaultRate,
 } = require("../controllers/rates.controller");
@@ -31,19 +29,19 @@ router.get("/:id/dates", getDates);
 
 //For dev only
 router.post("/", authenticateUser, createAccommodation);
-
-// router.delete("/:id/dates/:id", deleteDate);
+router.post("/:id/video", authenticateUser, upload.single("file"), addVideo);
+module.exports = router;
 
 //JWT
 router.post(
   "/:id/pictures",
   upload.array("images", 20),
-  /*   authenticateUser, */
+  authenticateUser,
   addPictures
 );
 router.patch(
   "/:id/dates/availability",
-  /*   authenticateUser, */
+  authenticateUser,
   updateAvailabilityForDates
 );
 router.patch("/:id/dates/rates", authenticateUser, updateRatesForDates);
@@ -53,5 +51,3 @@ router.delete(
   authenticateUser,
   deletePicture
 );
-
-module.exports = router;

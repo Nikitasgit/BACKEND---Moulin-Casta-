@@ -2,8 +2,6 @@ const { StatusCodes } = require("http-status-codes");
 const dotenv = require("dotenv").config();
 const crypto = require("crypto");
 const Accommodation = require("../models/acccommodation.model");
-/* // Sharp library is to resize images before sending them to storage
-const sharp = require('sharp') */
 
 //S3  files storage (for images)
 const {
@@ -11,6 +9,7 @@ const {
   PutObjectCommand,
   DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
+const { BadRequestError } = require("../errors");
 
 const s3 = new S3Client({
   credentials: {
@@ -20,13 +19,13 @@ const s3 = new S3Client({
   region: process.env.BUCKET_REGION,
 });
 
-const randomImageName = (bytes = 32) =>
+const randomFileName = (bytes = 32) =>
   crypto.randomBytes(bytes).toString("hex");
 
 const addPictures = async (req, res) => {
   const images = [];
   for (const file of req.files) {
-    const imageName = randomImageName();
+    const imageName = randomFileName();
     const params = {
       Bucket: process.env.BUCKET_NAME,
       Key: imageName,
@@ -46,6 +45,47 @@ const addPictures = async (req, res) => {
   );
   res.json({ updatedAccommodation });
 };
+
+const addVideo = async (req, res) => {
+  try {
+    const videoFile = req.file;
+
+    const accommodationId = req.params.id;
+    const accommodation = await Accommodation.findById(accommodationId);
+
+    if (!accommodation) {
+      throw new NotFoundError(
+        `No accommodation with the id ${accommodationId}`
+      );
+    }
+
+    const videoName = randomFileName();
+
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: videoName,
+      Body: videoFile.buffer,
+      ContentType: videoFile.mimetype,
+    };
+
+    const command = new PutObjectCommand(params);
+    await s3.send(command);
+
+    const videoItem = { videoName: videoName, url: "" };
+
+    const updatedAccommodation = await Accommodation.findByIdAndUpdate(
+      accommodationId,
+      { $set: { video: videoItem } },
+      { new: true }
+    );
+
+    res.json({ updatedAccommodation });
+  } catch (error) {
+    console.error(error);
+    throw new BadRequestError("Error adding video to accommodation");
+  }
+};
+
 const deletePicture = async (req, res) => {
   const { accommodationId, pictureId } = req.params;
   const accommodation = await Accommodation.findOne({ _id: accommodationId });
@@ -71,4 +111,4 @@ const deletePicture = async (req, res) => {
   res.send({});
 };
 
-module.exports = { addPictures, deletePicture };
+module.exports = { addPictures, deletePicture, addVideo };

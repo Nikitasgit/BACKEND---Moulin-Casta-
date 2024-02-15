@@ -11,6 +11,7 @@ const express = require("express");
 const app = express();
 const authRouter = require("./routes/auth.routes");
 const accommodations = require("./routes/accommodations.routes");
+const global = require("./routes/global.routes");
 
 const scheduler = require("./functions/scheduler");
 const connectDB = require("./db/connect");
@@ -36,6 +37,7 @@ app.get("/", (req, res) => {
 
 //Routes
 app.use("/api/v1/accommodations", accommodations);
+app.use("/api/v1", global);
 app.use("/auth", authRouter);
 
 //Connection to DB then server starts listening on defined port.

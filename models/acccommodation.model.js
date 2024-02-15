@@ -43,6 +43,10 @@ const AccommodationSchema = new mongoose.Schema({
       url: { type: String, required: false },
     },
   ],
+  video: {
+    videoName: { type: String, required: false, default: "" },
+    url: { type: String, required: false, default: "" },
+  },
   amenities: {
     bedrooms: {
       type: Number,
