@@ -14,7 +14,6 @@ const getDates = async (req, res) => {
 const updateAvailabilityForDates = async (req, res) => {
   const { id: accommodationID } = req.params;
   const { dates, availability } = req.body;
-  console.log("Request Body:", req.body);
 
   if (!dates || typeof availability === "undefined") {
     throw new BadRequestError(

@@ -4,7 +4,7 @@ const Accommodation = require("../models/acccommodation.model");
 
 const init = () => {
   // Schedule the task to run every day at midnight
-  cron.schedule("0 */12 * * *", async () => {
+  cron.schedule("14 * * * *", async () => {
     console.log("Scheduler started at", new Date());
     try {
       // Fetch all accommodations from the database
